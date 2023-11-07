@@ -1,0 +1,74 @@
+<head>
+    <script type="text/javascript" src="https://dev.cert.cash:8000/checkout-v0.1.js"></script>
+</head>
+<body style="background-color:#fffff">
+    <h3>Merchant Domain Checkout</h3>
+    <button id="checkout-cert" class="btn btn-primary">Checkout with Certificate</button>
+
+    <br><br>
+
+    <button id="checkout-url" class="btn btn-primary">Checkout with Payment Url</button>
+    <span id="paymentUrl"></span>	
+
+    <br><br>
+
+    <div id="container"></div>	
+    <div id="result"></div>
+
+    <script>
+    document.querySelector('#checkout-cert').addEventListener('click', function () {
+
+      // Render the component
+      Checkout({ 
+        paymentRequest: {
+          cert_hash: "9777323f923b85cdaabee216b251ed42fc3e0de978aa2091dd5dbbdf5ce180c3",
+          amount: 4,
+          merchant_name: "Zoid Checkout Merchant",
+        },
+        onSuccess: function(txidStr, link) {
+          console.log("Success, link:", link);
+          document.getElementById("result").innerHTML = `Payment successful, <a href="${link}" target="_blank">click here to see transaction with id ${txidStr}</a>`;
+        },
+        onCancel: function() {
+          console.log("payment canceled");
+          document.getElementById("result").innerHTML = "Payment has been canceled";
+        }
+      }).render('');
+
+    });
+
+    document.querySelector('#checkout-url').addEventListener('click', function () {
+      const params = {
+        merchant_name: "Zoid Checkout Merchant",
+        merchant_addr: "ecash:qq20ufx3rr00ej96xa2egwggrj7247stxq0awklt2w",
+        amount: 4,   
+        //offer_name: "OfferName",
+        //offer_description: "OfferDescription",
+        return_json: true       
+      };
+      
+      fetch("https://relay1.cmpct.org/v2?" + new URLSearchParams(params))
+        .then(res => res.json())
+        .then(function(data) {
+          document.getElementById("paymentUrl").innerText = data.paymentUrl;
+
+          // Render the component
+          Checkout({ 
+            paymentUrl: data.paymentUrl,
+            onSuccess: function(link) {
+              console.log("Success, link:", link);
+              document.getElementById("result").innerHTML = `Payment successful, <a href="${link}" target="_blank">click here to see transaction</a>`;
+            },
+            onCancel: function() {
+              console.log("payment canceled");
+              document.getElementById("result").innerHTML = "Payment has been canceled";
+            }
+          }).render('');
+
+        });
+    });
+
+    </script>
+
+</body>
+
