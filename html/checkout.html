@@ -1,74 +1,106 @@
 <head>
-    <script type="text/javascript" src="https://dev.cert.cash:3000/checkout-v0.1.js"></script>
+  <!-- <script type="text/javascript" src="https://dev.cert.cash:8332/checkout-v0.1.js"></script>-->
+  <script type="text/javascript" src="zoid-component.js"></script>
+  <link rel='stylesheet' type="text/css" href="/style.css" />
 </head>
-<body style="background-color:#fffff">
-    <h3>Merchant Domain Checkout</h3>
+<body>
+<div>
+    <h3>Checkout Demo</h3>
     <button id="checkout-cert" class="btn btn-primary">Checkout with Certificate</button>
 
     <br><br>
 
     <button id="checkout-url" class="btn btn-primary">Checkout with Payment Url</button>
-    <span id="paymentUrl"></span>	
 
     <br><br>
 
-    <div id="container"></div>	
-    <div id="result"></div>
+    <p><b>Url: </b><a id="url"></a></p>	
+    <p><b>Tx Link: </b><a id="success"></a></p>	
+    <p><a id="error"></a></p>
 
-    <script>
-    document.querySelector('#checkout-cert').addEventListener('click', function () {
+</div>
 
-      // Render the component
-      Checkout({ 
-        paymentRequest: {
-          cert_hash: "9777323f923b85cdaabee216b251ed42fc3e0de978aa2091dd5dbbdf5ce180c3",
-          amount: 4,
-          merchant_name: "Zoid Checkout Merchant",
-        },
-        onSuccess: function(txidStr, link) {
-          console.log("Success, link:", link);
-          document.getElementById("result").innerHTML = `Payment successful, <a href="${link}" target="_blank">click here to see transaction with id ${txidStr}</a>`;
-        },
-        onCancel: function() {
-          console.log("payment canceled");
-          document.getElementById("result").innerHTML = "Payment has been canceled";
-        }
-      }).render('');
 
-    });
+  <script>    
+  
+  function wipePrevious() {
+    document.getElementById("url").innerText ="";
+    document.getElementById("success").innerText ="";
+    document.getElementById("error").innerText ="";
+  }
 
-    document.querySelector('#checkout-url').addEventListener('click', function () {
-      const params = {
+
+  document.querySelector('#checkout-cert').addEventListener('click', function () {
+    wipePrevious();
+
+    // Render the component
+    Checkout({ 
+      paymentRequest: {
+        cert_hash: "0b483fd5a687c619549f0c33ce6b9ab94034bb1b8d428d45f40eec34594b6242",
+        amount: 4,
         merchant_name: "Zoid Checkout Merchant",
-        merchant_addr: "ecash:qq20ufx3rr00ej96xa2egwggrj7247stxq0awklt2w",
-        amount: 4,   
-        //offer_name: "OfferName",
-        //offer_description: "OfferDescription",
-        return_json: true       
-      };
-      
-      fetch("https://relay1.cmpct.org/v2?" + new URLSearchParams(params))
-        .then(res => res.json())
-        .then(function(data) {
-          document.getElementById("paymentUrl").innerText = data.paymentUrl;
+      },
+      onRequest: function(paymentRequest) {
+        console.log("paymentRequest:", paymentRequest);
 
-          // Render the component
-          Checkout({ 
-            paymentUrl: data.paymentUrl,
-            onSuccess: function(link) {
-              console.log("Success, link:", link);
-              document.getElementById("result").innerHTML = `Payment successful, <a href="${link}" target="_blank">click here to see transaction</a>`;
-            },
-            onCancel: function() {
-              console.log("payment canceled");
-              document.getElementById("result").innerHTML = "Payment has been canceled";
-            }
-          }).render('');
+        // save the payment id
+        const id = paymentRequest.paymentId;
+        // ...
 
-        });
-    });
+        const url = paymentRequest.paymentUrl;
+        document.getElementById("url").innerText = url;
+        document.getElementById("url").setAttribute("href", url);
+      },
+      onSuccess: function(txid, link) {
+        console.log("Success, link:", link);
+        document.getElementById("success").innerText = txid;
+        document.getElementById("success").setAttribute("href", link);
+      },
+      onCancel: function(error) {
+        console.log("payment canceled");
+        console.log(error)
+        document.getElementById("error").innerText = error;
+      }
+    }).render('');
 
-    </script>
+  });
+
+  document.querySelector('#checkout-url').addEventListener('click', function () {
+    wipePrevious();
+
+    const params = {
+      merchant_name: "Zoid Checkout Merchant",
+      merchant_addr: "ecash:qq20ufx3rr00ej96xa2egwggrj7247stxq0awklt2w",
+      amount: 4,   
+      // offer_name: "OfferName",
+      invoice: "98jf4",
+      offer_description: "OfferDescription",
+      return_json: true       
+    };
+    
+    fetch("https://relay1.cmpct.org/v2?" + new URLSearchParams(params))
+      .then(res => res.json())
+      .then(function(data) {
+        document.getElementById("url").innerText = data.paymentUrl;
+        document.getElementById("url").setAttribute("href", data.paymentUrl);
+
+        // Render the component
+        Checkout({ 
+          paymentUrl: data.paymentUrl,
+          onSuccess: function(txid, link) {
+            console.log("Success, link:", link);
+            document.getElementById("success").innerText = hash;
+            document.getElementById("success").setAttribute("href", link);
+          },
+          onCancel: function(error) {
+            console.log("payment canceled");
+            document.getElementById("error").innerText = error;
+          }
+        }).render('');
+
+      });
+  });
+  </script>
 
 </body>
 

@@ -63,13 +63,11 @@ document.querySelector('#checkout-url').addEventListener('click', function () {
         // Render the component
         Checkout({ 
         paymentUrl: data.paymentUrl,
-        onSuccess: function(link) {
-            console.log("Success, link:", link);
-            document.getElementById("result").innerHTML = `Payment successful, <a href="${link}" target="_blank">click here to see transaction</a>`;
+        onSuccess: function(txid, link) {
+            console.log("Success, tx link:", link);
         },
-        onCancel: function() {
-            console.log("payment canceled");
-            document.getElementById("result").innerHTML = "Payment has been canceled";
+        onCancel: function(error) {
+            console.log("payment has been canceled with error:", error);
         }
         }).render('');
 

@@ -1,0 +1,18 @@
+body {
+    background-color: whitesmoke;
+    /* font-family: 'Georgia', serif; */
+    font-family: "Gill Sans", sans-serif;
+}
+
+div {
+    width: 400px;
+    margin: auto;
+    position: center;
+}
+
+button {
+    width: 90%;
+    margin: auto;
+    position: center;
+    height: 40px;
+}
